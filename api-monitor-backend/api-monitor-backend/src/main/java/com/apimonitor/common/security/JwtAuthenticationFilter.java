@@ -17,11 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-/**
- * JWT Authentication Filter — lives in common/security.
- * Runs once per request, validates the Bearer token, and sets
- * the SecurityContext so downstream filters see an authenticated user.
- */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -31,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     private static final String AUTH_HEADER = "Authorization";
-    private static final String BEARER      = "Bearer ";
+    private static final String BEARER = "Bearer ";
 
     @Override
     protected void doFilterInternal(
@@ -42,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader(AUTH_HEADER);
 
-        // No Bearer token → skip authentication (Spring Security handles 401)
+        // 1. Skip if no token → let SecurityConfig handle it
         if (authHeader == null || !authHeader.startsWith(BEARER)) {
             chain.doFilter(request, response);
             return;
@@ -53,21 +49,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             final String userEmail = jwtService.extractUsername(jwt);
 
-            // Only authenticate if not already set in this request's context
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            if (userEmail != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    var authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                // 2. Load user
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(userEmail);
 
-                    log.debug("Authenticated [{}] → {}", userEmail, request.getRequestURI());
+                // 3. Validate token
+                if (!jwtService.isTokenValid(jwt, userDetails)) {
+                    throw new RuntimeException("Invalid or expired JWT");
                 }
+
+                // 4. Set authentication
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                log.debug("Authenticated [{}] → {}", userEmail, request.getRequestURI());
             }
+
         } catch (Exception e) {
-            log.warn("JWT auth failed for [{}]: {}", request.getRequestURI(), e.getMessage());
+
+
+            SecurityContextHolder.clearContext();
+
+            log.warn("JWT authentication failed for [{}]: {}",
+                    request.getRequestURI(), e.getMessage());
+
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {
+                  "success": false,
+                  "message": "Invalid or expired token"
+                }
+            """);
+
+            return; // STOP filter chain here
         }
 
         chain.doFilter(request, response);
@@ -75,7 +104,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Skip for public auth endpoints — minor optimization
         return request.getServletPath().startsWith("/api/v1/auth/");
     }
 }

@@ -25,7 +25,7 @@ export default function LogsPage() {
 
   return (
     <div style={styles.page}>
-      {/* ── Header ─────────────────────────────────────── */}
+      {/* ── Header */}
       <PageHeader
         title="API Logs"
         subtitle="Searchable request history with filtering"
@@ -42,17 +42,17 @@ export default function LogsPage() {
         )}
       </PageHeader>
 
-      {/* ── Error state ─────────────────────────────────── */}
+      {/* ── Error state  */}
       {error && (
         <div style={{ marginBottom: 16 }}>
           <ErrorMessage message={error} onRetry={refresh} />
         </div>
       )}
 
-      {/* ── Filter bar ──────────────────────────────────── */}
+      {/* ── Filter bar  */}
       <LogsFilter onFilter={applyFilters} loading={loading} />
 
-      {/* ── Logs table ──────────────────────────────────── */}
+      {/* ── Logs table  */}
       <LogsTable
         data={page}
         loading={loading}

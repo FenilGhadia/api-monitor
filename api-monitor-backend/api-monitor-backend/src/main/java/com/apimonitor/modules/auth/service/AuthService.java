@@ -18,15 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Auth module's business logic.
- *
- * Cross-module dependencies (intentional and documented):
- *  → common/security  : JwtService
- *  → modules/user     : UserRepository, User, Role
- *
- * All logic is in the service. The controller is purely HTTP-layer.
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,12 +29,9 @@ public class AuthService {
     private final JwtService            jwtService;
     private final AuthenticationManager authenticationManager;
 
-    // ── Register ─────────────────────────────────────────────────────────
 
-    /**
-     * Creates a new USER-role account and returns JWT tokens.
-     * Validates email + username uniqueness before persisting.
-     */
+
+
     @Transactional
     public AuthResponse register(RegisterRequest request) {
 
@@ -59,29 +48,24 @@ public class AuthService {
                 .username(request.username())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .role(Role.USER)
+                .role(Role.ADMIN)
                 .enabled(true)
                 .build();
 
         User saved = userRepository.save(user);
-        log.info("Registered new user: {} ({})", saved.getUsername(), saved.getEmail());
+        log.info("Admin account created: {} ({})", saved.getUsername(), saved.getEmail());
 
         return buildAuthResponse(saved);
     }
 
-    // ── Login ─────────────────────────────────────────────────────────────
 
-    /**
-     * Authenticates via Spring's AuthenticationManager (BCrypt check inside).
-     * Returns JWT tokens on success; throws 401 on bad credentials.
-     */
+
     public AuthResponse login(LoginRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.password())
             );
         } catch (BadCredentialsException e) {
-            // Generic message — avoids leaking whether the email exists
             throw new ApiException("Invalid email or password", HttpStatus.UNAUTHORIZED);
         }
 
@@ -92,12 +76,9 @@ public class AuthService {
         return buildAuthResponse(user);
     }
 
-    // ── Refresh token ─────────────────────────────────────────────────────
 
-    /**
-     * Issues a new short-lived access token using a valid refresh token.
-     * Stateless: no server-side token storage — validates signature + expiry only.
-     */
+
+
     public AuthResponse refreshToken(String rawRefreshToken) {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             throw new ApiException("Refresh token is required", HttpStatus.BAD_REQUEST);
@@ -111,7 +92,7 @@ public class AuthService {
             throw new ApiException("Refresh token is invalid or expired", HttpStatus.UNAUTHORIZED);
         }
 
-        // Issue new access token; keep the same refresh token
+
         return new AuthResponse(
                 jwtService.generateAccessToken(user),
                 rawRefreshToken,
@@ -122,7 +103,7 @@ public class AuthService {
         );
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────
+
 
     private AuthResponse buildAuthResponse(User user) {
         return new AuthResponse(

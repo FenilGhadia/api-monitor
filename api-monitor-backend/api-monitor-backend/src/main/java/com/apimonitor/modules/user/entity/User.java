@@ -13,12 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * User entity — the authentication principal.
- *
- * Implements UserDetails for direct Spring Security integration.
- * Email is the unique login identifier (getUsername() returns email).
- */
+
 @Entity
 @Table(
         name = "users",
@@ -43,7 +38,7 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 100)
     private String email;
 
-    /** BCrypt-hashed. Never stored in plain text. */
+
     @Column(nullable = false)
     private String password;
 
@@ -63,14 +58,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // ── UserDetails ───────────────────────────────────────────────────────
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
-    /** Spring Security username = email */
+
     @Override
     public String getUsername() { return email; }
 

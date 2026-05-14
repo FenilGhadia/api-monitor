@@ -3,10 +3,7 @@ package com.apimonitor.common.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-/**
- * Domain-specific runtime exception.
- * Carries an HTTP status so GlobalExceptionHandler maps it directly.
- */
+
 @Getter
 public class ApiException extends RuntimeException {
 

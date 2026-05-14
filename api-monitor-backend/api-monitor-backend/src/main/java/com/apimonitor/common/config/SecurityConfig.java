@@ -19,17 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * Central Spring Security configuration — moved to common/config.
- *
- * Route protection summary:
- *  /api/v1/auth/**      → public
- *  /api/v1/admin/**     → ADMIN only
- *  /api/v1/logs/**      → ADMIN only (log data is sensitive)
- *  /api/v1/analytics/** → ADMIN only
- *  /api/v1/users/me     → any authenticated user
- *  everything else      → authenticated
- */
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -39,27 +29,24 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider  authenticationProvider;
 
-    private static final String[] PUBLIC_PATHS = {
-            "/api/v1/auth/**",
-            "/actuator/health",
-            "/v3/api-docs/**",
-            "/swagger-ui/**"
-    };
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_PATHS).permitAll()
-                        // Monitoring data — admin only
-                        .requestMatchers("/api/v1/logs/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/analytics/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        // Destructive operations — admin only
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasRole("ADMIN")
-                        // Everything else — any authenticated user
+                        // Infrastructure — always public
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+
+                        // Auth — login and refresh are public; register is explicitly blocked
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").denyAll()
+
+                        // Everything else under /api/v1/** requires ADMIN role
+                        .requestMatchers("/api/v1/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

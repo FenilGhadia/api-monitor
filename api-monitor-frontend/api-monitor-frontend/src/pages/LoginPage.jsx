@@ -9,12 +9,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [localErr, setLocalErr] = useState('')
 
-  // Redirect if already authenticated
+ 
   useEffect(() => {
     if (isAuthenticated) navigate('/dashboard', { replace: true })
   }, [isAuthenticated, navigate])
 
-  // Sync auth context error to local state
+  
   useEffect(() => {
     if (error) setLocalErr(error)
   }, [error])

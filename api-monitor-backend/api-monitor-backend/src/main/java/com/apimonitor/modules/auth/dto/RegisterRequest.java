@@ -4,9 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/**
- * Request body for POST /api/v1/auth/register
- */
+
 public record RegisterRequest(
 
         @NotBlank(message = "Username is required")

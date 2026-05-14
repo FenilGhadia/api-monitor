@@ -5,21 +5,7 @@ import lombok.Getter;
 
 import java.time.Instant;
 
-/**
- * Uniform JSON envelope for every API response.
- *
- * All controllers return ResponseEntity<ApiResponse<T>> so the
- * frontend always receives a predictable shape:
- * {
- *   "success": true,
- *   "message": "...",
- *   "data": { ... },
- *   "timestamp": "2024-01-15T10:00:00Z"
- * }
- *
- * Uses Java 21 — generic type parameter T.
- * @JsonInclude(NON_NULL) suppresses "data":null on void responses.
- */
+
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {

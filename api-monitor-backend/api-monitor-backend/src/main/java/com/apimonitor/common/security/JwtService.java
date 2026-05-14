@@ -17,10 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * Central service for all JWT operations.
- * Moved to common/security — shared by auth module and the JWT filter.
- */
+
 @Slf4j
 @Service
 public class JwtService {

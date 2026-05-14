@@ -7,7 +7,7 @@ import StatusCodeChart from '../components/dashboard/StatusCodeChart'
 import EndpointStatsTable from '../components/dashboard/EndpointStatsTable'
 import { PageHeader, ErrorMessage } from '../components/common'
 
-/* ── Time window presets ────────────────────────────────── */
+
 const WINDOWS = [
   { label: '1h',  hours: 1   },
   { label: '6h',  hours: 6   },

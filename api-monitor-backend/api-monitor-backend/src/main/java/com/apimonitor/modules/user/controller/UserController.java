@@ -17,16 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST controller for user management.
- *
- * Routes:
- *  GET    /api/v1/users/me              → own profile (any authenticated user)
- *  PATCH  /api/v1/users/me/password     → change own password
- *  GET    /api/v1/users                 → list all users (ADMIN)
- *  GET    /api/v1/users/{id}            → get user by id (ADMIN)
- *  PATCH  /api/v1/users/{id}/toggle     → enable/disable account (ADMIN)
- */
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -34,7 +25,7 @@ public class UserController {
 
     private final UserService userService;
 
-    /** Returns the currently authenticated user's profile */
+
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserDto>> getMyProfile(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -43,7 +34,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Profile retrieved", dto));
     }
 
-    /** Change own password — verifies current password before updating */
+
     @PatchMapping("/me/password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -57,7 +48,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Password updated successfully"));
     }
 
-    /** Paginated list of all users — ADMIN only */
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<UserDto>>> getAllUsers(
@@ -70,14 +61,14 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Users retrieved", page));
     }
 
-    /** Get a specific user by ID — ADMIN only */
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success("User retrieved", userService.getById(id)));
     }
 
-    /** Enable or disable a user account — ADMIN only */
+
     @PatchMapping("/{id}/toggle")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserDto>> toggleUserStatus(

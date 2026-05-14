@@ -12,19 +12,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Authentication endpoints — all PUBLIC (no JWT required).
- *
- * POST /api/v1/auth/register  → create account, returns tokens
- * POST /api/v1/auth/login     → authenticate, returns tokens
- * POST /api/v1/auth/refresh   → exchange refresh token for new access token
- */
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
+
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
@@ -44,20 +39,19 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Login successful", tokens));
     }
 
-    /**
-     * Refresh token is passed in Authorization header: "Bearer <refresh_token>"
-     */
-    // AuthController.java — replace refresh method body
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String refreshToken = extractBearer(authHeader);
+
+        if (refreshToken == null) {
             throw new ApiException(
                     "Authorization header must be: Bearer <refresh_token>",
-                    HttpStatus.UNAUTHORIZED);
+                    HttpStatus.BAD_REQUEST
+            );
         }
-        String refreshToken = authHeader.substring(7);
+
         AuthResponse tokens = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed", tokens));
     }

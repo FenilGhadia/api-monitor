@@ -11,7 +11,7 @@ export function useAnalytics(from = null, to = null, refreshInterval = 60_000) {
   const [error,         setError]         = useState(null)
   const [lastUpdated,   setLastUpdated]   = useState(null)
 
-  // ── Mounted guard ────────────────────────────────────────────────────
+  
   const mountedRef = useRef(true)
   useEffect(() => {
     mountedRef.current = true

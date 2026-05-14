@@ -51,19 +51,19 @@ export function useLogs(pageSize = 20) {
     fetchLogs(currentPage, filters)
   }, [currentPage])
 
-  // Page change
+  
   const setPage = useCallback((n) => {
     setCurrentPage(n)
   }, [])
 
-  // Apply filters (triggers fetch)
+  
   const applyFilters = useCallback((newFilters) => {
     setFilters(newFilters)
     setCurrentPage(0)
-    fetchLogs(0, newFilters) // 🔥 manual fetch
+    fetchLogs(0, newFilters) 
   }, [fetchLogs])
 
-  // Manual refresh
+  
   const refresh = useCallback(() => {
     fetchLogs(currentPage, filters)
   }, [currentPage, filters, fetchLogs])

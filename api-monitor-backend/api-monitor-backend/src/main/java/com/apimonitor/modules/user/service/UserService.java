@@ -13,15 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Business logic for user management operations.
- *
- * Responsibilities:
- *  - Retrieve profile (self or admin-view)
- *  - List all users (ADMIN only — enforced at controller level)
- *  - Enable / disable accounts
- *  - Change password with current-password verification
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,7 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // ── Queries ───────────────────────────────────────────────────────────
+
 
     @Transactional(readOnly = true)
     public UserDto getById(Long id) {
@@ -45,16 +37,13 @@ public class UserService {
                         "User not found: " + email, HttpStatus.NOT_FOUND));
     }
 
-    /**
-     * Paginated list of all users.
-     * Controller must restrict to ADMIN via @PreAuthorize.
-     */
+
     @Transactional(readOnly = true)
     public Page<UserDto> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable).map(UserDto::from);
     }
 
-    // ── Mutations ─────────────────────────────────────────────────────────
+
 
     @Transactional
     public UserDto toggleEnabled(Long id, boolean enabled) {
@@ -82,7 +71,7 @@ public class UserService {
         log.info("Password changed for user [{}]", email);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+
 
     private User findOrThrow(Long id) {
         return userRepository.findById(id)

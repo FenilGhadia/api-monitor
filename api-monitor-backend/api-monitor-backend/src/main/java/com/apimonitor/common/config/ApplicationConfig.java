@@ -12,12 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * Core application beans: AuthenticationProvider, PasswordEncoder, AuthenticationManager.
- *
- * @EnableAsync activates @Async support for non-blocking log writes
- * in the monitoring module.
- */
+
 @Configuration
 @EnableAsync
 @RequiredArgsConstructor

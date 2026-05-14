@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
                 ));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.success("Validation failed", fieldErrors));
+                .body(ApiResponse.failure("Validation failed", fieldErrors));
     }
 
     // ── Security ────────────────────────────────────────────────────────────
